@@ -1,21 +1,19 @@
 package com.example.rqchallenge.employees;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -25,72 +23,51 @@ public class EmployeeController implements IEmployeeController {
     private static final String GET_ALL_EMPLOYEES = "http://localhost:9090/api/v1/employees";
     private static final String GET_BY_EMPLOYEE_ID = "http://localhost:9090/api/v1/employee/";
 
-    private HttpClient httpClient;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
+    private final RestTemplate restTemplate;
 
     @Autowired
-    public EmployeeController(HttpClient httpClient, ObjectMapper objectMapper) {
-        this.httpClient = httpClient;
+    public EmployeeController(ObjectMapper objectMapper, RestTemplate restTemplate) {
         this.objectMapper = objectMapper;
+        this.restTemplate = restTemplate;
     }
 
     @Override
     public ResponseEntity<List<Employee>> getAllEmployees() throws IOException {
-        URI targetUri = null;
-        try {
-            targetUri = new URI(GET_ALL_EMPLOYEES);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        final HttpResponse<String> httpResponse;
-        try {
-            httpResponse = httpClient.send(HttpRequest.newBuilder().uri(targetUri).build(), HttpResponse.BodyHandlers.ofString());
-            final ApiGetAllResponse apiGetAllResponse = objectMapper.readValue(httpResponse.body(), ApiGetAllResponse.class);
-            return new ResponseEntity<>(apiGetAllResponse.getData(), HttpStatus.OK);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
-        return null;
+        final List<Employee> employeeList = getEmployees();
+
+        return new ResponseEntity<>(employeeList, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<List<Employee>> getEmployeesByNameSearch(String searchString) {
-
-        URI targetUri = null;
         try {
-            targetUri = new URI(GET_ALL_EMPLOYEES);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        final HttpResponse<String> httpResponse;
-        try {
-            httpResponse = httpClient.send(HttpRequest.newBuilder().uri(targetUri).build(), HttpResponse.BodyHandlers.ofString());
-            final ApiGetAllResponse apiGetAllResponse = objectMapper.readValue(httpResponse.body(), ApiGetAllResponse.class);
             String nameToSearch = URLDecoder.decode(searchString, StandardCharsets.UTF_8.toString());
-            final List<Employee> employee = apiGetAllResponse.getData().stream().filter(r -> r.getEmployeeName().contains(nameToSearch)).collect(Collectors.toList());
-            return new ResponseEntity<>(employee, HttpStatus.OK);
-        } catch (InterruptedException | IOException e) {
+            final List<Employee> employeeList = getEmployees();
+            final List<Employee> employeesMatching = employeeList.stream().filter(r -> r.getEmployeeName().contains(nameToSearch)).collect(Collectors.toList());
+            return new ResponseEntity<>(employeesMatching, HttpStatus.OK);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
         return null;
     }
 
+    private List<Employee> getEmployees() throws com.fasterxml.jackson.core.JsonProcessingException {
+        final ResponseEntity<String> responseEntity = restTemplate.getForEntity(GET_ALL_EMPLOYEES, String.class);
+        final ApiGetAllResponse body =  objectMapper.readValue(responseEntity.getBody(), ApiGetAllResponse.class);
+        return body.getData();
+    }
+
     @Override
     public ResponseEntity<Employee> getEmployeeById(String id) {
-        URI targetUri = null;
         try {
-            targetUri = new URI(GET_BY_EMPLOYEE_ID + id);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        final HttpResponse<String> httpResponse;
-        try {
-            httpResponse = httpClient.send(HttpRequest.newBuilder().uri(targetUri).build(), HttpResponse.BodyHandlers.ofString());
-            final ApiGetSingleResponse apiGetSingleResponse = objectMapper.readValue(httpResponse.body(), ApiGetSingleResponse.class);
-            return new ResponseEntity<>(apiGetSingleResponse.getData(), HttpStatus.OK);
-        } catch (InterruptedException | IOException e) {
+            final ResponseEntity<String> responseEntity = restTemplate.getForEntity(GET_BY_EMPLOYEE_ID + id, String.class);
+            final ApiGetSingleResponse body =  objectMapper.readValue(responseEntity.getBody(), ApiGetSingleResponse.class);
+            return new ResponseEntity<>(body.getData(), HttpStatus.OK);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -99,6 +76,14 @@ public class EmployeeController implements IEmployeeController {
 
     @Override
     public ResponseEntity<Integer> getHighestSalaryOfEmployees() {
+        try {
+            final List<Employee> employeeList = getEmployees();
+            final int highestSalary = employeeList.stream().mapToInt(Employee::getEmployeeSalary).max().orElseThrow(NoSuchElementException::new);
+            return new ResponseEntity<>(highestSalary, HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 

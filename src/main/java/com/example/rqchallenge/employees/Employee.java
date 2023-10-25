@@ -10,7 +10,7 @@ public class Employee {
     @JsonProperty("employee_name")
     private String employeeName;
     @JsonProperty("employee_salary")
-    private long employeeSalary;
+    private int employeeSalary;
     @JsonProperty("employee_age")
     private int employeeAge;
     @JsonProperty("profile_image")
@@ -19,7 +19,7 @@ public class Employee {
     public Employee() {
     }
 
-    public Employee(int id, String employeeName, long employeeSalary, int employeeAge, int profileImage) {
+    public Employee(int id, String employeeName, int employeeSalary, int employeeAge, int profileImage) {
         this.id = id;
         this.employeeName = employeeName;
         this.employeeSalary = employeeSalary;
@@ -35,7 +35,7 @@ public class Employee {
         return employeeName;
     }
 
-    public long getEmployeeSalary() {
+    public int getEmployeeSalary() {
         return employeeSalary;
     }
 

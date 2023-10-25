@@ -1,6 +1,5 @@
 package com.example.rqchallenge.employees;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -116,6 +115,20 @@ class EmployeeControllerTest {
         assertEquals(1, employees.size());
         assertEquals(1, employees.get(0).getId());
         assertEquals("Tiger Nixon", employees.get(0).getEmployeeName());
+    }
+
+    @Test
+    public void getHighestEarningEmployee() {
+        ResponseEntity<Integer> response = restTemplate.exchange("http://localhost:" + port + "/highestSalary",
+                HttpMethod.GET,
+                null,
+                Integer.class);
+
+        final int statusCodeValue = response.getStatusCodeValue();
+
+        assertEquals(200, statusCodeValue);
+        assertNotNull(response);
+        assertEquals(725000, response.getBody());
     }
 
 }

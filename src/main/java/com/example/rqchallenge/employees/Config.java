@@ -7,8 +7,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.http.HttpClient;
-
 @Configuration
 @ComponentScan("com.example.rqchallenge")
 public class Config {
@@ -16,12 +14,6 @@ public class Config {
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
-    }
-
-    @Bean
-    public HttpClient httpClient() {
-        return HttpClient.newBuilder()
-                .build();
     }
 
     @Bean
