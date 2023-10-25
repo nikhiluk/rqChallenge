@@ -9,17 +9,21 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
-public class EmployeeController implements IEmployeeController{
+public class EmployeeController implements IEmployeeController {
 
-    private static final String GET_ALL_EMPLOYEES = "https://dummy.restapiexample.com/api/v1/employees";
-    private static final String GET_BY_EMPLOYEE_ID = "https://dummy.restapiexample.com/api/v1/employee/";
+//    private static final String GET_ALL_EMPLOYEES = "https://dummy.restapiexample.com/api/v1/employees";
+    private static final String GET_ALL_EMPLOYEES = "http://localhost:9090/api/v1/employees";
+    private static final String GET_BY_EMPLOYEE_ID = "http://localhost:9090/api/v1/employee/";
 
     private HttpClient httpClient;
     private ObjectMapper objectMapper;
@@ -52,6 +56,24 @@ public class EmployeeController implements IEmployeeController{
 
     @Override
     public ResponseEntity<List<Employee>> getEmployeesByNameSearch(String searchString) {
+
+        URI targetUri = null;
+        try {
+            targetUri = new URI(GET_ALL_EMPLOYEES);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        final HttpResponse<String> httpResponse;
+        try {
+            httpResponse = httpClient.send(HttpRequest.newBuilder().uri(targetUri).build(), HttpResponse.BodyHandlers.ofString());
+            final ApiGetAllResponse apiGetAllResponse = objectMapper.readValue(httpResponse.body(), ApiGetAllResponse.class);
+            String nameToSearch = URLDecoder.decode(searchString, StandardCharsets.UTF_8.toString());
+            final List<Employee> employee = apiGetAllResponse.getData().stream().filter(r -> r.getEmployeeName().contains(nameToSearch)).collect(Collectors.toList());
+            return new ResponseEntity<>(employee, HttpStatus.OK);
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+
         return null;
     }
 

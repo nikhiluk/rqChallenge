@@ -17,6 +17,17 @@ dependencies {
     implementation 'javax.inject:javax.inject:1'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.14'
+
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.9'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    testImplementation "org.wiremock:wiremock:3.2.0"
+    testImplementation 'com.github.tomakehurst:wiremock-jre8-standalone:2.35.0'
+//    testImplementation 'com.github.tomakehurst:wiremock-standalone:2.27.2'
+//    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'io.github.ricall.junit5-wiremock:junit5-wiremock:2.0.0'
 }
 
 test {
