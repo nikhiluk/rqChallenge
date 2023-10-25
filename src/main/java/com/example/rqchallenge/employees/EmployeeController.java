@@ -11,15 +11,17 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestController
 public class EmployeeController implements IEmployeeController {
 
-//    private static final String GET_ALL_EMPLOYEES = "https://dummy.restapiexample.com/api/v1/employees";
+    //    private static final String GET_ALL_EMPLOYEES = "https://dummy.restapiexample.com/api/v1/employees";
     private static final String GET_ALL_EMPLOYEES = "http://localhost:9090/api/v1/employees";
     private static final String GET_BY_EMPLOYEE_ID = "http://localhost:9090/api/v1/employee/";
 
@@ -57,7 +59,7 @@ public class EmployeeController implements IEmployeeController {
 
     private List<Employee> getEmployees() throws com.fasterxml.jackson.core.JsonProcessingException {
         final ResponseEntity<String> responseEntity = restTemplate.getForEntity(GET_ALL_EMPLOYEES, String.class);
-        final ApiGetAllResponse body =  objectMapper.readValue(responseEntity.getBody(), ApiGetAllResponse.class);
+        final ApiGetAllResponse body = objectMapper.readValue(responseEntity.getBody(), ApiGetAllResponse.class);
         return body.getData();
     }
 
@@ -65,7 +67,7 @@ public class EmployeeController implements IEmployeeController {
     public ResponseEntity<Employee> getEmployeeById(String id) {
         try {
             final ResponseEntity<String> responseEntity = restTemplate.getForEntity(GET_BY_EMPLOYEE_ID + id, String.class);
-            final ApiGetSingleResponse body =  objectMapper.readValue(responseEntity.getBody(), ApiGetSingleResponse.class);
+            final ApiGetSingleResponse body = objectMapper.readValue(responseEntity.getBody(), ApiGetSingleResponse.class);
             return new ResponseEntity<>(body.getData(), HttpStatus.OK);
         } catch (IOException e) {
             e.printStackTrace();
@@ -78,10 +80,10 @@ public class EmployeeController implements IEmployeeController {
     public ResponseEntity<Integer> getHighestSalaryOfEmployees() {
         try {
             final List<Employee> employeeList = getEmployees();
-            List<Integer> salaries = getSalaries(employeeList);
-            salaries.sort(Comparator.reverseOrder());
+            final int highestSalary = getEmployeesSortedBySalary(employeeList)
+                    .get(employeeList.size() - 1)
+                    .getEmployeeSalary();
 
-            final int highestSalary = salaries.get(0);
             return new ResponseEntity<>(highestSalary, HttpStatus.OK);
 
         } catch (JsonProcessingException e) {
@@ -91,13 +93,29 @@ public class EmployeeController implements IEmployeeController {
         return null;
     }
 
-    private List<Integer> getSalaries(List<Employee> employees) {
-        return employees.stream().map(Employee::getEmployeeSalary).collect(Collectors.toList());
-    }
-
     @Override
     public ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames() {
+        try {
+            final List<String> toReturn = new ArrayList<>();
+
+            final List<Employee> employeeList = getEmployees();
+
+            List<Employee> employees = getEmployeesSortedBySalary(employeeList);
+            int size = employees.size();
+            for (int i = 0; i < 10; i++) {
+                toReturn.add(employees.get(--size).getEmployeeName());
+            }
+            return new ResponseEntity<>(toReturn, HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
         return null;
+    }
+
+    private List<Employee> getEmployeesSortedBySalary(List<Employee> employeeList) {
+        return employeeList.stream().sorted(Comparator.comparing(Employee::getEmployeeSalary))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -131,4 +131,23 @@ class EmployeeControllerTest {
         assertEquals(725000, response.getBody());
     }
 
+
+    @Test
+    public void getTenHighestEarningEmployees() {
+        ResponseEntity<List<String>> response = restTemplate.exchange("http://localhost:" + port + "/topTenHighestEarningEmployeeNames",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {
+                });
+
+        final int statusCodeValue = response.getStatusCodeValue();
+
+        assertEquals(200, statusCodeValue);
+        final List<String> employees = response.getBody();
+        assertNotNull(employees);
+        assertEquals(10, employees.size());
+        assertEquals("Paul Byrd", employees.get(0));
+        assertEquals("Tiger Nixon", employees.get(9));
+    }
+
 }
