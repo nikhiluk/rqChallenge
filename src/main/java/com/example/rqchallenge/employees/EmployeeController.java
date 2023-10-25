@@ -135,6 +135,7 @@ public class EmployeeController implements IEmployeeController {
 
     @Override
     public ResponseEntity<String> deleteEmployeeById(String id) {
-        return null;
+        restTemplate.delete("http://localhost:9090/api/v1/delete/" + id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

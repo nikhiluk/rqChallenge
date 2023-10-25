@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -51,8 +52,10 @@ class EmployeeControllerTest {
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "text/plain")
                         .withBody("{\"status\": \"success\", \"data\": {\"name\": \"test\", \"salary\": \"123\", \"age\": \"23\", \"id\": 25}}")));
-
-
+        stubFor(delete(urlEqualTo("/api/v1/delete/25"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "text/plain")
+                        .withBody("{\"status\": \"success\", \"message\":\"successfully! deleted Records\"}")));
     }
 
     @Test
@@ -162,7 +165,7 @@ class EmployeeControllerTest {
     public void createEmployee() {
         Map<String, Object> map = Map.of("name", "test", "salary", "123", "age", "23");
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(map);
-        final ResponseEntity<Employee> response = restTemplate.exchange("http://localhost:" + port ,
+        final ResponseEntity<Employee> response = restTemplate.exchange("http://localhost:" + port,
                 HttpMethod.POST,
                 requestEntity,
                 Employee.class);
@@ -174,6 +177,20 @@ class EmployeeControllerTest {
         assertNotNull(employee);
         assertEquals("test", employee.getEmployeeName());
         assertEquals(25, employee.getId());
+    }
+
+    @Test
+    public void deleteEmployeeById() {
+        final ResponseEntity<String> response = restTemplate.exchange("http://localhost:" + port + "/25",
+                HttpMethod.DELETE,
+                null,
+                String.class);
+
+        final int statusCodeValue = response.getStatusCodeValue();
+
+        assertEquals(200, statusCodeValue);
+//        final String status = response.getBody();
+//        assertEquals("success", status);
     }
 
 }
