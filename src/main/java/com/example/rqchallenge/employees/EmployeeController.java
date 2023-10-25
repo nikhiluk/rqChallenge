@@ -11,9 +11,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestController
@@ -78,13 +78,21 @@ public class EmployeeController implements IEmployeeController {
     public ResponseEntity<Integer> getHighestSalaryOfEmployees() {
         try {
             final List<Employee> employeeList = getEmployees();
-            final int highestSalary = employeeList.stream().mapToInt(Employee::getEmployeeSalary).max().orElseThrow(NoSuchElementException::new);
+            List<Integer> salaries = getSalaries(employeeList);
+            salaries.sort(Comparator.reverseOrder());
+
+            final int highestSalary = salaries.get(0);
             return new ResponseEntity<>(highestSalary, HttpStatus.OK);
+
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    private List<Integer> getSalaries(List<Employee> employees) {
+        return employees.stream().map(Employee::getEmployeeSalary).collect(Collectors.toList());
     }
 
     @Override
