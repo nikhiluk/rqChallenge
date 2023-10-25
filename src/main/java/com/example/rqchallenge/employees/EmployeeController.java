@@ -24,6 +24,7 @@ public class EmployeeController implements IEmployeeController {
     //    private static final String GET_ALL_EMPLOYEES = "https://dummy.restapiexample.com/api/v1/employees";
     private static final String GET_ALL_EMPLOYEES = "http://localhost:9090/api/v1/employees";
     private static final String GET_BY_EMPLOYEE_ID = "http://localhost:9090/api/v1/employee/";
+    private static final String CREATE_EMPLOYEE_URL = "http://localhost:9090/api/v1/create";
 
     private final ObjectMapper objectMapper;
 
@@ -120,6 +121,15 @@ public class EmployeeController implements IEmployeeController {
 
     @Override
     public ResponseEntity<Employee> createEmployee(Map<String, Object> employeeInput) {
+
+        final ResponseEntity<String> postForEntity = restTemplate.postForEntity(CREATE_EMPLOYEE_URL, employeeInput, String.class);
+
+        try {
+            final ApiGetSingleResponse apiGetSingleResponse = objectMapper.readValue(postForEntity.getBody(), ApiGetSingleResponse.class);
+            return new ResponseEntity<>(apiGetSingleResponse.getData(), HttpStatus.OK);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

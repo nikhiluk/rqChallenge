@@ -1,5 +1,6 @@
 package com.example.rqchallenge.employees;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -8,10 +9,13 @@ public class Employee {
 
     private int id;
     @JsonProperty("employee_name")
+    @JsonAlias("name")
     private String employeeName;
     @JsonProperty("employee_salary")
+    @JsonAlias("salary")
     private int employeeSalary;
     @JsonProperty("employee_age")
+    @JsonAlias("age")
     private int employeeAge;
     @JsonProperty("profile_image")
     private int profileImage;

@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
@@ -15,9 +16,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,6 +47,11 @@ class EmployeeControllerTest {
                 .willReturn(aResponse()
                         .withHeader("Content-Type", "text/plain")
                         .withBody("{\"status\":\"success\",\"data\":{\"id\":1,\"employee_name\":\"Tiger Nixon\",\"employee_salary\":320800,\"employee_age\":61,\"profile_image\":\"\"},\"message\":\"Successfully! Record has been fetched.\"}")));
+        stubFor(post(urlEqualTo("/api/v1/create"))
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "text/plain")
+                        .withBody("{\"status\": \"success\", \"data\": {\"name\": \"test\", \"salary\": \"123\", \"age\": \"23\", \"id\": 25}}")));
+
 
     }
 
@@ -148,6 +156,24 @@ class EmployeeControllerTest {
         assertEquals(10, employees.size());
         assertEquals("Paul Byrd", employees.get(0));
         assertEquals("Tiger Nixon", employees.get(9));
+    }
+
+    @Test
+    public void createEmployee() {
+        Map<String, Object> map = Map.of("name", "test", "salary", "123", "age", "23");
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(map);
+        final ResponseEntity<Employee> response = restTemplate.exchange("http://localhost:" + port ,
+                HttpMethod.POST,
+                requestEntity,
+                Employee.class);
+
+        final int statusCodeValue = response.getStatusCodeValue();
+
+        assertEquals(200, statusCodeValue);
+        final Employee employee = response.getBody();
+        assertNotNull(employee);
+        assertEquals("test", employee.getEmployeeName());
+        assertEquals(25, employee.getId());
     }
 
 }
