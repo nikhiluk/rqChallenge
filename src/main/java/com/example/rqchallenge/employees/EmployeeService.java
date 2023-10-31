@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -40,33 +39,33 @@ public class EmployeeService {
         this.deleteEmployeeUrl = deleteEmployeeUrl;
     }
 
-    public List<Employee> getEmployees() throws IOException {
+    public List<Employee> getEmployees() {
         final ResponseEntity<String> responseEntity = restTemplate.getForEntity(getAllEmployeesUrl, String.class);
         final ApiGetAllResponse body = parseResponse(responseEntity.getBody(), ApiGetAllResponse.class);
         return body.getData();
     }
 
-    public List<Employee> getEmployeesByNameSearch(String nameToSearch) throws IOException {
+    public List<Employee> getEmployeesByNameSearch(String nameToSearch)  {
         final List<Employee> employeeList = getEmployees();
         return employeeList.stream().filter(r -> r.getEmployeeName().contains(nameToSearch)).collect(Collectors.toList());
     }
 
-    public Employee getEmployeeById(String id) throws IOException{
+    public Employee getEmployeeById(String id) {
         final ResponseEntity<String> responseEntity = restTemplate.getForEntity(getEmployeesByIdUrl + id, String.class);
         final ApiGetSingleResponse body = parseResponse(responseEntity.getBody(), ApiGetSingleResponse.class);
         return body.getData();
 
     }
 
-    public <T> T parseResponse(String json, Class<T> valueType) throws IOException {
+    public <T> T parseResponse(String json, Class<T> valueType) {
         try {
             return objectMapper.readValue(json, valueType);
         } catch (JsonProcessingException e) {
-            throw new IOException("Unable to parse response");
+            throw new UnParseableResponseException("Unable to parse response");
         }
     }
 
-    public int getHighestSalary() throws IOException {
+    public int getHighestSalary() {
         final List<Employee> employeeList = getEmployees();
         return getEmployeesSortedBySalary(employeeList)
                 .get(employeeList.size() - 1)
@@ -78,7 +77,7 @@ public class EmployeeService {
                 .collect(Collectors.toList());
     }
 
-    public List<String> getNamesOfTopTenHighestEarners() throws IOException {
+    public List<String> getNamesOfTopTenHighestEarners() {
         final List<Employee> employeeList = getEmployees();
         List<Employee> employees = getEmployeesSortedBySalary(employeeList);
 
@@ -87,7 +86,7 @@ public class EmployeeService {
         return employees.subList(0, 10).stream().map(Employee::getEmployeeName).collect(Collectors.toList());
     }
 
-    public Employee createEmployee(Map<String, Object> employeeInput) throws IOException {
+    public Employee createEmployee(Map<String, Object> employeeInput) {
         final ResponseEntity<String> postForEntity = restTemplate.postForEntity(createEmployeeUrl, employeeInput, String.class);
         final ApiGetSingleResponse body = parseResponse(postForEntity.getBody(), ApiGetSingleResponse.class);
         return body.getData();

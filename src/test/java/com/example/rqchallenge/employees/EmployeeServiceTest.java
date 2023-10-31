@@ -44,9 +44,9 @@ class EmployeeServiceTest {
         final ResponseEntity<String> responseEntity = new ResponseEntity<>("Some String", HttpStatus.OK);
         when(restTemplate.getForEntity(GET_ALL_EMPLOYEES_URL, String.class)).thenReturn(responseEntity);
 
-        final IOException ioException = assertThrows(IOException.class, () -> employeeService.getEmployees());
+        final UnParseableResponseException exception = assertThrows(UnParseableResponseException.class, () -> employeeService.getEmployees());
 
-        assertEquals("Unable to parse response", ioException.getMessage());
+        assertEquals("Unable to parse response", exception.getMessage());
     }
 
 
