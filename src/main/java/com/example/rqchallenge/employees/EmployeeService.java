@@ -10,8 +10,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,15 +23,21 @@ public class EmployeeService {
     private final RestTemplate restTemplate;
     private final String getAllEmployeesUrl;
     private final String getEmployeesByIdUrl;
+    private final String createEmployeeUrl;
+    private final String deleteEmployeeUrl;
 
     @Autowired
     public EmployeeService(ObjectMapper objectMapper, RestTemplate restTemplate,
                            @Value("${getAllEmployeesUrl}") String getAllEmployeesUrl,
-                           @Value("${getEmployeesByIdUrl}") String getEmployeesByIdUrl) {
+                           @Value("${getEmployeesByIdUrl}") String getEmployeesByIdUrl,
+                           @Value("${createEmployeeUrl}") String createEmployeeUrl,
+                           @Value("${deleteEmployeeUrl}") String deleteEmployeeUrl) {
         this.objectMapper = objectMapper;
         this.restTemplate = restTemplate;
         this.getAllEmployeesUrl = getAllEmployeesUrl;
         this.getEmployeesByIdUrl = getEmployeesByIdUrl;
+        this.createEmployeeUrl = createEmployeeUrl;
+        this.deleteEmployeeUrl = deleteEmployeeUrl;
     }
 
     public List<Employee> getEmployees() throws IOException {
@@ -70,18 +78,22 @@ public class EmployeeService {
                 .collect(Collectors.toList());
     }
 
-    public List<String> getNameOfTopTenHighestEarners() throws IOException {
+    public List<String> getNamesOfTopTenHighestEarners() throws IOException {
         final List<Employee> employeeList = getEmployees();
-
         List<Employee> employees = getEmployeesSortedBySalary(employeeList);
-        int size = employees.size();
-        final List<String> toReturn = new ArrayList<>();
-        int i = 0;
-        while (i < 10) {
-            toReturn.add(employees.get(--size).getEmployeeName());
-            i++;
-        }
 
-        return toReturn;
+        Collections.reverse(employees);
+
+        return employees.subList(0, 10).stream().map(Employee::getEmployeeName).collect(Collectors.toList());
+    }
+
+    public Employee createEmployee(Map<String, Object> employeeInput) throws IOException {
+        final ResponseEntity<String> postForEntity = restTemplate.postForEntity(createEmployeeUrl, employeeInput, String.class);
+        final ApiGetSingleResponse body = parseResponse(postForEntity.getBody(), ApiGetSingleResponse.class);
+        return body.getData();
+    }
+
+    public void deleteEmployeeById(String id) {
+        restTemplate.delete(deleteEmployeeUrl + id);
     }
 }

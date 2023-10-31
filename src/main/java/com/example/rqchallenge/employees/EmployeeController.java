@@ -1,37 +1,23 @@
 package com.example.rqchallenge.employees;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 public class EmployeeController implements IEmployeeController {
 
-    private static final String CREATE_EMPLOYEE_URL = "http://localhost:9090/api/v1/create";
-
-    private final ObjectMapper objectMapper;
-
-    private final RestTemplate restTemplate;
-
     private final EmployeeService employeeService;
 
     @Autowired
-    public EmployeeController(ObjectMapper objectMapper, RestTemplate restTemplate, EmployeeService employeeService) {
-        this.objectMapper = objectMapper;
-        this.restTemplate = restTemplate;
+    public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
@@ -62,27 +48,19 @@ public class EmployeeController implements IEmployeeController {
 
     @Override
     public ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames() throws IOException {
-        final List<String> toReturn = employeeService.getNameOfTopTenHighestEarners();
-        return new ResponseEntity<>(toReturn, HttpStatus.OK);
+        final List<String> namesOfTopTenHighestEarners = employeeService.getNamesOfTopTenHighestEarners();
+        return new ResponseEntity<>(namesOfTopTenHighestEarners, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Employee> createEmployee(Map<String, Object> employeeInput) {
-
-        final ResponseEntity<String> postForEntity = restTemplate.postForEntity(CREATE_EMPLOYEE_URL, employeeInput, String.class);
-
-        try {
-            final ApiGetSingleResponse apiGetSingleResponse = objectMapper.readValue(postForEntity.getBody(), ApiGetSingleResponse.class);
-            return new ResponseEntity<>(apiGetSingleResponse.getData(), HttpStatus.OK);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public ResponseEntity<Employee> createEmployee(Map<String, Object> employeeInput) throws IOException {
+        Employee employee = employeeService.createEmployee(employeeInput);
+        return new ResponseEntity<>(employee, HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<String> deleteEmployeeById(String id) {
-        restTemplate.delete("http://localhost:9090/api/v1/delete/" + id);
+        employeeService.deleteEmployeeById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

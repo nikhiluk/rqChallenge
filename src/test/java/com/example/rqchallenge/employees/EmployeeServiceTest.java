@@ -21,6 +21,8 @@ class EmployeeServiceTest {
 
     private static final String GET_ALL_EMPLOYEES_URL = "http://localhost:9090/api/v1/employees";
     private static final String GET_EMPLOYEE_BY_ID_URL = "http://localhost:9090/api/v1/employee/";
+    private static final String CREATE_EMPLOYEE_URL = "http://localhost:9090/api/v1/create";
+    private static final String DELETE_EMPLOYEE_URL = "http://localhost:9090/api/v1/delete/";
 
     private RestTemplate restTemplate;
     private EmployeeService employeeService;
@@ -30,7 +32,11 @@ class EmployeeServiceTest {
         restTemplate = mock(RestTemplate.class);
         ObjectMapper objectMapper = new ObjectMapper();
 
-        employeeService = new EmployeeService(objectMapper, restTemplate, GET_ALL_EMPLOYEES_URL, GET_EMPLOYEE_BY_ID_URL);
+        employeeService = new EmployeeService(objectMapper, restTemplate,
+                GET_ALL_EMPLOYEES_URL,
+                GET_EMPLOYEE_BY_ID_URL,
+                CREATE_EMPLOYEE_URL,
+                DELETE_EMPLOYEE_URL);
     }
 
     @Test
