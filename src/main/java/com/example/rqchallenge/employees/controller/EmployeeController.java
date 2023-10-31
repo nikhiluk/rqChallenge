@@ -1,5 +1,7 @@
-package com.example.rqchallenge.employees;
+package com.example.rqchallenge.employees.controller;
 
+import com.example.rqchallenge.employees.service.Employee;
+import com.example.rqchallenge.employees.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.example.rqchallenge.employees;
+package com.example.rqchallenge.employees.exception;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

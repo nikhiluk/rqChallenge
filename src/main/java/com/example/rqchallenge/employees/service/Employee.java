@@ -1,4 +1,4 @@
-package com.example.rqchallenge.employees;
+package com.example.rqchallenge.employees.service;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -1,19 +1,21 @@
-package com.example.rqchallenge.employees;
+package com.example.rqchallenge.employees.controller;
 
+import com.example.rqchallenge.employees.service.Employee;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ApiGetSingleResponse {
+public class ApiGetAllResponse {
 
     private String status;
-    private Employee data;
+    private List<Employee> data;
 
-    public ApiGetSingleResponse() {
+
+    public ApiGetAllResponse() {
     }
 
-    public ApiGetSingleResponse(String status, Employee data) {
+    public ApiGetAllResponse(String status, List<Employee> data) {
         this.status = status;
         this.data = data;
     }
@@ -22,7 +24,7 @@ public class ApiGetSingleResponse {
         return status;
     }
 
-    public Employee getData() {
+    public List<Employee> getData() {
         return data;
     }
 }

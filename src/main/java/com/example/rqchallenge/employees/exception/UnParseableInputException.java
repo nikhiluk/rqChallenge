@@ -1,4 +1,4 @@
-package com.example.rqchallenge.employees;
+package com.example.rqchallenge.employees.exception;
 
 public class UnParseableInputException extends RuntimeException{
 
