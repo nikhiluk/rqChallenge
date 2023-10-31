@@ -73,4 +73,6 @@ public class EmployeeControllerUnhappyPathTest {
         assertNotNull(body);
         assertEquals("search string invalid", body);
     }
+
+    //TODO: Cover more error scenarios to mimic backend failures.
 }

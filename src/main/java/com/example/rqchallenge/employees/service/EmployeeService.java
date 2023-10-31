@@ -110,4 +110,6 @@ public class EmployeeService {
         logger.info("Starting call to delete employee");
         restTemplate.delete(deleteEmployeeUrl + id);
     }
+
+    //TODO: Ideally, the usage of rest template can be further pushed down a layer into a rest client to handle circuit breaking etc.
 }

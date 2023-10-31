@@ -49,5 +49,8 @@ class EmployeeServiceTest {
         assertEquals("Unable to parse response", exception.getMessage());
     }
 
+    //TODO: Cover more error scenarios to mimic backend failures.
+
+
 
 }
