@@ -1,16 +1,21 @@
 package com.example.rqchallenge.employees.exception;
 
-import org.springframework.http.HttpStatus;
-
-class ApiError {
-
-   private HttpStatus status;
-   private String message;
-   private String debugMessage;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 
-   ApiError(HttpStatus status, Throwable ex) {
-       this.status = status;
-       this.message = "Unexpected error";
-   }
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ApiError {
+
+    private String message;
+
+    public ApiError() {
+    }
+
+    public ApiError(String message) {
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }

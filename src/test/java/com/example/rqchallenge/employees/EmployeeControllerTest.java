@@ -190,8 +190,6 @@ class EmployeeControllerTest {
         final int statusCodeValue = response.getStatusCodeValue();
 
         assertEquals(200, statusCodeValue);
-//        final String status = response.getBody();
-//        assertEquals("success", status);
     }
 
 }
