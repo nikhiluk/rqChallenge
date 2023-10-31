@@ -15,108 +15,55 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestController
 public class EmployeeController implements IEmployeeController {
 
-    //    private static final String GET_ALL_EMPLOYEES = "https://dummy.restapiexample.com/api/v1/employees";
-    private static final String GET_ALL_EMPLOYEES = "http://localhost:9090/api/v1/employees";
-    private static final String GET_BY_EMPLOYEE_ID = "http://localhost:9090/api/v1/employee/";
     private static final String CREATE_EMPLOYEE_URL = "http://localhost:9090/api/v1/create";
 
     private final ObjectMapper objectMapper;
 
     private final RestTemplate restTemplate;
 
+    private final EmployeeService employeeService;
+
     @Autowired
-    public EmployeeController(ObjectMapper objectMapper, RestTemplate restTemplate) {
+    public EmployeeController(ObjectMapper objectMapper, RestTemplate restTemplate, EmployeeService employeeService) {
         this.objectMapper = objectMapper;
         this.restTemplate = restTemplate;
+        this.employeeService = employeeService;
     }
 
     @Override
     public ResponseEntity<List<Employee>> getAllEmployees() throws IOException {
-
-        final List<Employee> employeeList = getEmployees();
-
+        final List<Employee> employeeList = employeeService.getEmployees();
         return new ResponseEntity<>(employeeList, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<Employee>> getEmployeesByNameSearch(String searchString) {
-        try {
-            String nameToSearch = URLDecoder.decode(searchString, StandardCharsets.UTF_8.toString());
-            final List<Employee> employeeList = getEmployees();
-            final List<Employee> employeesMatching = employeeList.stream().filter(r -> r.getEmployeeName().contains(nameToSearch)).collect(Collectors.toList());
-            return new ResponseEntity<>(employeesMatching, HttpStatus.OK);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private List<Employee> getEmployees() throws com.fasterxml.jackson.core.JsonProcessingException {
-        final ResponseEntity<String> responseEntity = restTemplate.getForEntity(GET_ALL_EMPLOYEES, String.class);
-        final ApiGetAllResponse body = objectMapper.readValue(responseEntity.getBody(), ApiGetAllResponse.class);
-        return body.getData();
+    public ResponseEntity<List<Employee>> getEmployeesByNameSearch(String searchString) throws IOException {
+        String nameToSearch = URLDecoder.decode(searchString, StandardCharsets.UTF_8.toString());
+        List<Employee> employees = employeeService.getEmployeesByNameSearch(nameToSearch);
+        return new ResponseEntity<>(employees, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Employee> getEmployeeById(String id) {
-        try {
-            final ResponseEntity<String> responseEntity = restTemplate.getForEntity(GET_BY_EMPLOYEE_ID + id, String.class);
-            final ApiGetSingleResponse body = objectMapper.readValue(responseEntity.getBody(), ApiGetSingleResponse.class);
-            return new ResponseEntity<>(body.getData(), HttpStatus.OK);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+    public ResponseEntity<Employee> getEmployeeById(String id) throws IOException {
+        Employee employee = employeeService.getEmployeeById(id);
+        return new ResponseEntity<>(employee, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<Integer> getHighestSalaryOfEmployees() {
-        try {
-            final List<Employee> employeeList = getEmployees();
-            final int highestSalary = getEmployeesSortedBySalary(employeeList)
-                    .get(employeeList.size() - 1)
-                    .getEmployeeSalary();
-
-            return new ResponseEntity<>(highestSalary, HttpStatus.OK);
-
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return null;
+    public ResponseEntity<Integer> getHighestSalaryOfEmployees() throws IOException {
+        final int highestSalary = employeeService.getHighestSalary();
+        return new ResponseEntity<>(highestSalary, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames() {
-        try {
-            final List<String> toReturn = new ArrayList<>();
-
-            final List<Employee> employeeList = getEmployees();
-
-            List<Employee> employees = getEmployeesSortedBySalary(employeeList);
-            int size = employees.size();
-            for (int i = 0; i < 10; i++) {
-                toReturn.add(employees.get(--size).getEmployeeName());
-            }
-            return new ResponseEntity<>(toReturn, HttpStatus.OK);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    private List<Employee> getEmployeesSortedBySalary(List<Employee> employeeList) {
-        return employeeList.stream().sorted(Comparator.comparing(Employee::getEmployeeSalary))
-                .collect(Collectors.toList());
+    public ResponseEntity<List<String>> getTopTenHighestEarningEmployeeNames() throws IOException {
+        final List<String> toReturn = employeeService.getNameOfTopTenHighestEarners();
+        return new ResponseEntity<>(toReturn, HttpStatus.OK);
     }
 
     @Override
