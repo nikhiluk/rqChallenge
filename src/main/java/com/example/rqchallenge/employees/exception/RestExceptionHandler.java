@@ -22,7 +22,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UnParseableInputException.class)
-    public ResponseEntity<ApiError> handleUnparseableResponse(
+    public ResponseEntity<ApiError> handleUnparseableInput(
             UnParseableInputException exception) {
         ApiError apiError = new ApiError(exception.getMessage());
         return new ResponseEntity<>(apiError, BAD_REQUEST);
