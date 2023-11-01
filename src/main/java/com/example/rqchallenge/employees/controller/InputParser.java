@@ -18,7 +18,7 @@ public class InputParser {
         try {
             return URLDecoder.decode(searchString, StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException|IllegalArgumentException e) {
-            logger.error(e.getMessage());
+            logger.error("Unable to parse input");
             throw new UnParseableInputException("search string invalid");
         }
     }

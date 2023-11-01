@@ -69,7 +69,7 @@ public class EmployeeService {
         try {
             return objectMapper.readValue(json, valueType);
         } catch (JsonProcessingException e) {
-            logger.error(e.getMessage());
+            logger.error("Unable to parse response");
             throw new UnParseableResponseException("Unable to parse response");
         }
     }
